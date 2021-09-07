@@ -15,28 +15,34 @@ public class AttBill {
 
     public Map<String, Double> generatePhoneBill(Map<String, Double> map) {
 
+        double lateFee = 0;
         double internet = map.get("internet");
         double totalBill = map.get("totalBill");
         double totalMembers = map.get("numberofpeople");
+        if (map.containsKey("latefee")) {
+            lateFee = map.get("latefee");
+        }
         double indvInternet = internet / totalMembers;
 
         Map<String, Double> personsMap = new HashMap<>(map);
         personsMap.remove("internet");
         personsMap.remove("numberofpeople");
         personsMap.remove("totalBill");
+        personsMap.remove("latefee");
 
+        double finalLateFee = lateFee;
         personsMap.forEach((k, v) -> {
-            personsMap.put(k, v + indvInternet);
+            personsMap.put(k, v + indvInternet + finalLateFee / totalMembers);
         });
 
-        if(personsMap.containsKey("ramya")) {
+        if (personsMap.containsKey("ramya")) {
             personsMap.put("ramya", personsMap.get("ramya") - 20);
             personsMap.put("rishi", personsMap.get("rishi") + 20);
         }
 
         LinkedHashMap<String, Double> sortedMap = new LinkedHashMap<>();
 
-        personsMap.entrySet().stream().sorted(Map.Entry.comparingByValue()).forEachOrdered(x -> sortedMap.put(x.getKey(), x.getValue()));
+        personsMap.entrySet().stream().sorted(Map.Entry.comparingByValue()).forEachOrdered(x -> sortedMap.put(x.getKey(), (double) Math.round(x.getValue())));
 
         double calculatedBill = sortedMap.values().stream()
                 .mapToDouble(v -> v)
